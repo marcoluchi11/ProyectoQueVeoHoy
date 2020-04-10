@@ -10,7 +10,7 @@ function devolverTodasLasPeliculas(req,res){
     var orden = req.query.columna_orden; // TITULO PUNTUACION O MAS NUEVA
     var tipoOrden = req.query.tipo_orden; // ASC DESC
     if(anio === undefined && titulo === undefined && genero === undefined){
-             sql = 'select * from pelicula' + " limit "+ pagina +","+ cantidad;
+             sql = 'select * from pelicula' +' order by '+orden+' '+ tipoOrden+  " limit "+ pagina +","+ cantidad;
              total = 'select count(*) as total from pelicula';
     }
     if(anio != undefined && titulo != undefined){
@@ -41,9 +41,7 @@ function devolverTodasLasPeliculas(req,res){
     if(genero === undefined && titulo != undefined && anio === undefined){
             sql = 'select * from pelicula where titulo like "'+titulo+'%'+'"' + ' order by '+ orden + ' ' + tipoOrden + " limit "+ pagina +","+ cantidad;
             total = 'select count(*) as total from pelicula where titulo like "'+titulo+'%'+'"' + ' order by '+ orden + ' ' + tipoOrden;
-    }
-    console.log(sql);
-    
+    }    
     con.query(sql,function(error,resultado,fields){
             if(error){
                 console.log('Hubo un error en la consulta', error.message);
@@ -85,14 +83,14 @@ function devolverGeneros(req,res){
 function devolverInfoPelicula(req,res){
 var id = req.params.id;
 var actores = 'select actor.nombre from pelicula inner join actor_pelicula on pelicula.id = actor_pelicula.pelicula_id join actor on actor.id = actor_pelicula.actor_id where pelicula.id = '+ id;
-var pelicula = 'select titulo,trama,puntuacion,duracion,fecha_lanzamiento,director,anio,genero.nombre from pelicula join genero on pelicula.genero_id = genero.id where pelicula.id = '+id;
+var pelicula = 'select titulo,trama,puntuacion,duracion,fecha_lanzamiento,director,anio,genero.nombre,poster from pelicula join genero on pelicula.genero_id = genero.id where pelicula.id = '+id;
 con.query(pelicula,function(error,resultado,fields){
     if(error){
         console.log('Ha ocurrido un error, el id es invalido');
         return res.status(404).send('hubo un error en la consulta');
     }
 
-    con.query(actores,function(err,actores){
+    con.query(actores,function(error,actores){
 
             var respuesta = {
 
@@ -105,11 +103,48 @@ con.query(pelicula,function(error,resultado,fields){
         })
 
 
-});
+    });
 }
+
+function Recomendador(req,res){
+    var sql;
+    var anioInicio = req.query.anio_inicio;
+    var anioFin = req.query.anio_fin;
+    var puntuacion = req.query.puntuacion;
+    var genero = req.query.genero;
+        if(anioInicio != undefined && anioFin != undefined){
+
+            sql = 'select titulo,trama,genero.nombre,poster,pelicula.id from pelicula join genero on pelicula.genero_id = genero.id where anio > '+anioInicio+ ' and anio < '+anioFin + ' and genero.nombre = '+'"'+genero+'"';
+        }
+
+        if(puntuacion != undefined){
+
+            sql = 'select titulo,trama,genero.nombre,poster,pelicula.id from pelicula join genero on pelicula.genero_id = genero.id where puntuacion  >= '+puntuacion + ' and genero.nombre = '+'"'+genero+'"';
+        }
+        if(anioInicio === undefined && anioFin === undefined && puntuacion === undefined && genero === undefined){
+            sql = 'select titulo,trama,genero.nombre,poster,pelicula.id from pelicula join genero on pelicula.genero_id = genero.id'
+        }
+        con.query(sql,function(error,resultado,fields){
+
+            if(error){
+
+                console.log('hubo un error en la consulta');
+                return res.status(404).send('hubo un error en la consulta de recomendaciones');
+            }
+            var respuesta = {
+
+                'peliculas': resultado,
+            }
+
+            res.send(JSON.stringify(respuesta));
+        })
+
+
+};
 module.exports = {
 
     mostrarTodasLasPeliculas: devolverTodasLasPeliculas,
     mostrarTodosLosGeneros: devolverGeneros,
     mostrarPeliculaporid: devolverInfoPelicula,
+    recomendarPelicula: Recomendador,
 }
