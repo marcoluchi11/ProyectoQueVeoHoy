@@ -108,28 +108,41 @@ con.query(pelicula,function(error,resultado,fields){
 
 function Recomendador(req,res){
     var sql;
+    var duracion = req.query.duracion;
     var anioInicio = req.query.anio_inicio;
     var anioFin = req.query.anio_fin;
     var puntuacion = req.query.puntuacion;
     var genero = req.query.genero;
     var pedido = 'select titulo,trama,genero.nombre,poster,pelicula.id from pelicula join genero on pelicula.genero_id = genero.id';
-        if(anioInicio != undefined && anioFin != undefined && genero != undefined){
+        if(anioInicio,anioFin,genero != undefined){
 
             sql = pedido + ' where anio > '+anioInicio+ ' and anio < '+anioFin + ' and genero.nombre = '+'"'+genero+'"';
         }else if(genero === undefined){
             sql = pedido + ' where anio > '+anioInicio+ ' and anio < '+anioFin;
         }
-        if(puntuacion != undefined && genero != undefined){
+        if(puntuacion,genero != undefined){
             sql = pedido + ' where puntuacion  >= '+puntuacion + ' and genero.nombre = '+'"'+genero+'"';
         }else if (puntuacion != undefined){
             sql = pedido + ' where puntuacion  >= '+puntuacion;
         }
+        console.log(duracion);
+        console.log(anioFin);
         if(anioInicio === undefined && anioFin === undefined && puntuacion === undefined && genero === undefined){
+            console.log('entra aca che');
             sql = pedido;
         }else if(genero != undefined){
 
             sql = pedido + ' and genero.nombre = '+'"'+genero+'"';
         }
+
+        if(duracion != undefined && genero === undefined){
+            
+;            sql = pedido + ' where duracion <= '+ duracion;
+        }else if(genero,duracion != undefined){
+            sql = pedido + ' where duracion <= '+ duracion + ' and genero.nombre = '+'"'+genero+'"'; ;
+        }
+
+        console.log(sql);
         con.query(sql,function(error,resultado,fields){
 
             if(error){

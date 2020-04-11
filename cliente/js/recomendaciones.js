@@ -13,7 +13,7 @@ function ControladorRecomendaciones() {
     this.resultados;
     this.puntuacion;
     this.pelicula_actual;
-
+    this.duracion;
     //esta funcion crea y les da funcionalidad a los botones (que contienen las distintas respuestas a las pregunas).
     this.inicializarPreguntas = function() {
         var self = this;
@@ -41,6 +41,10 @@ function ControladorRecomendaciones() {
         $(".paso-1 .boton-cualquiera").click(function() {
             self.cargarSegundaPregunta();
         });
+        $(".paso-1 .boton-duracion").click(function(){
+            self.duracion = 100;
+            self.cargarSegundaPregunta();
+        })
 
         $(".paso-1 .btn-film").click(function() {
             $(".paso-1 .btn-film").removeClass('active');
@@ -99,6 +103,9 @@ function ControladorRecomendaciones() {
         //se setean los parametros correspondientes para luego ser enviados al servidor.
         var query_params = {};
 
+        if(this.duracion){
+            query_params.duracion = this.duracion;
+        }
         if (this.genero)
             query_params.genero = this.genero;
 
