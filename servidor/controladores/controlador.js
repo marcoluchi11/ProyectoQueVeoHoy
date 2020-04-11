@@ -128,7 +128,6 @@ function Recomendador(req,res){
         console.log(duracion);
         console.log(anioFin);
         if(anioInicio === undefined && anioFin === undefined && puntuacion === undefined && genero === undefined){
-            console.log('entra aca che');
             sql = pedido;
         }else if(genero != undefined){
 
@@ -141,20 +140,15 @@ function Recomendador(req,res){
         }else if(genero,duracion != undefined){
             sql = pedido + ' where duracion <= '+ duracion + ' and genero.nombre = '+'"'+genero+'"'; ;
         }
-
-        console.log(sql);
         con.query(sql,function(error,resultado,fields){
 
             if(error){
-
                 console.log('hubo un error en la consulta');
                 return res.status(404).send('hubo un error en la consulta de recomendaciones');
             }
             var respuesta = {
-
                 'peliculas': resultado,
             }
-
             res.send(JSON.stringify(respuesta));
         })
 
