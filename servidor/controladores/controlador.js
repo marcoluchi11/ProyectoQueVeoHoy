@@ -112,17 +112,23 @@ function Recomendador(req,res){
     var anioFin = req.query.anio_fin;
     var puntuacion = req.query.puntuacion;
     var genero = req.query.genero;
-        if(anioInicio != undefined && anioFin != undefined){
+    var pedido = 'select titulo,trama,genero.nombre,poster,pelicula.id from pelicula join genero on pelicula.genero_id = genero.id';
+        if(anioInicio != undefined && anioFin != undefined && genero != undefined){
 
-            sql = 'select titulo,trama,genero.nombre,poster,pelicula.id from pelicula join genero on pelicula.genero_id = genero.id where anio > '+anioInicio+ ' and anio < '+anioFin + ' and genero.nombre = '+'"'+genero+'"';
+            sql = pedido + ' where anio > '+anioInicio+ ' and anio < '+anioFin + ' and genero.nombre = '+'"'+genero+'"';
+        }else if(genero === undefined){
+            sql = pedido + ' where anio > '+anioInicio+ ' and anio < '+anioFin;
         }
-
-        if(puntuacion != undefined){
-
-            sql = 'select titulo,trama,genero.nombre,poster,pelicula.id from pelicula join genero on pelicula.genero_id = genero.id where puntuacion  >= '+puntuacion + ' and genero.nombre = '+'"'+genero+'"';
+        if(puntuacion != undefined && genero != undefined){
+            sql = pedido + ' where puntuacion  >= '+puntuacion + ' and genero.nombre = '+'"'+genero+'"';
+        }else if (puntuacion != undefined){
+            sql = pedido + ' where puntuacion  >= '+puntuacion;
         }
         if(anioInicio === undefined && anioFin === undefined && puntuacion === undefined && genero === undefined){
-            sql = 'select titulo,trama,genero.nombre,poster,pelicula.id from pelicula join genero on pelicula.genero_id = genero.id'
+            sql = pedido;
+        }else if(genero != undefined){
+
+            sql = pedido + ' and genero.nombre = '+'"'+genero+'"';
         }
         con.query(sql,function(error,resultado,fields){
 
